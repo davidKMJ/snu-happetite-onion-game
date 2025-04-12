@@ -6,9 +6,12 @@ import NavigateBtn from "../components/Button";
 import { useState } from "react";
 import { storeStringData } from "../utils/asyncUtils";
 import { storeStartingDate } from "../utils/dateUtils";
+import { StackScreenProps } from "@react-navigation/stack";
+import { RootStackParamList } from "../types";
 
-export const Onboarding = () => {
-    const navigation = useNavigation();
+type OnboardingProps = StackScreenProps<RootStackParamList, 'Onboarding'>
+
+export const Onboarding = ({ route, navigation }: OnboardingProps) => {
     const [name, setName] = useState('');
     return (
         <View>
@@ -23,7 +26,7 @@ export const Onboarding = () => {
                 navigation={navigation}
                 screenName="Main"
                 params={{name: name}}
-                onPress={async () => {await storeStringData('name', name); await storeStartingDate()}}
+                onPress={async () => {await storeStringData('name', name); await storeStartingDate(); await storeStringData('currentGrowth', '0')}}
             />
         </View>
         

@@ -1,5 +1,6 @@
 import { TouchableOpacity } from "react-native";
 import { NavigationProps } from "../types";
+import { storeStringData } from "../utils/asyncUtils";
 
 const NavigateBtn = ({navigation, screenName, params, onPress}: NavigationProps) => {
   return (
@@ -9,6 +10,7 @@ const NavigateBtn = ({navigation, screenName, params, onPress}: NavigationProps)
         if (onPress) {
           await onPress();
         }
+        await storeStringData('lastScreenName', screenName);
         navigation.navigate(screenName, params);
       }}
     />
