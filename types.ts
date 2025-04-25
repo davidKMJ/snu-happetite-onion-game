@@ -10,7 +10,7 @@ export type RootStackParamList = {
     Onboarding: undefined;
     Main: { name: string };
     ChatLog: undefined;
-    DeathAnimation: undefined;
+    DeathAnimation: { deathMessage: string | undefined };
     Death: undefined;
     Harvest: undefined;
     HarvestAnimation: undefined;
@@ -20,4 +20,9 @@ export type Message = {
     text: string;
     growth: number;
     date: Date;
-}
+};
+
+export type ApiResponse = {
+    score: number;
+    reason?: string;
+};

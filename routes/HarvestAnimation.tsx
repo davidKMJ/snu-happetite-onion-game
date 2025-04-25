@@ -1,10 +1,14 @@
-import { StackScreenProps } from "@react-navigation/stack"
-import { RootStackParamList } from "../types"
+import { StackScreenProps } from "@react-navigation/stack";
+import { RootStackParamList } from "../types";
 
-type HarvestAnimationProps = StackScreenProps<RootStackParamList, 'HarvestAnimation'>
+type HarvestAnimationProps = StackScreenProps<
+    RootStackParamList,
+    "HarvestAnimation"
+>;
 
-export const HarvestAnimation = ({ route, navigation }: HarvestAnimationProps) => {
-    return (
-        <></>
-    )
-}
+export const HarvestAnimation = ({
+    route,
+    navigation,
+}: HarvestAnimationProps) => {
+    return <></>;
+};
