@@ -22,6 +22,12 @@ export const ChatLog = ({ route, navigation }: ChatLogProps) => {
     , [])
     return (
         <View>
+            <NavigateBtn
+                navigation={navigation}
+                screenName="Main"
+                params={{ name: name }}
+                style={{ width: '40%', height: 35, backgroundColor: 'rgb(78, 102, 74)', borderRadius: 15, justifyContent: 'center', alignItems: 'center', marginTop: 10 }}
+            />
             {chatLog.map((message, index) => (
                 <View key={index}>
                     <Text>{message.text}</Text>
@@ -29,11 +35,6 @@ export const ChatLog = ({ route, navigation }: ChatLogProps) => {
                     <Text>{message.date.toString()}</Text>
                 </View>
             ))}
-            <NavigateBtn
-                navigation={navigation}
-                screenName="Main"
-                params={{ name: name }}
-            />
         </View>
     )
 }

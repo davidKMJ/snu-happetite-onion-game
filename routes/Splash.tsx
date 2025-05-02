@@ -15,9 +15,9 @@ export const Splash = ({ route, navigation }: SplashProps) => {
                 "Onboarding") as keyof RootStackParamList;
             if (lastScreenName === "Main") {
                 const name = (await getStringData("name")) as string;
-                navigation.navigate("Main", { name: name });
+                navigation.replace("Main", { name: name });
             } else {
-                navigation.navigate(lastScreenName);
+                navigation.replace(lastScreenName);
             }
         }, 2000);
         return () => clearTimeout(timer);

@@ -1,4 +1,5 @@
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, LogBox } from "react-native";
+LogBox.ignoreAllLogs();
 import {StyleSheet} from 'react-native';
 import { OnionImages } from "../components/Onion";
 import { calculateDaysPassed } from "../utils/dateUtils";
@@ -86,9 +87,9 @@ export const Main = ({ route, navigation }: MainProps) => {
                 (await getStringData("currentGrowth")) || "0"
             );
             if (currentGrowth + newMessage.growth > MAX_GROWTH) {
-                navigation.navigate("HarvestAnimation");
+                navigation.replace("HarvestAnimation");
             } else if (newMessage.growth < 0) {
-                navigation.navigate("DeathAnimation", {
+                navigation.replace("DeathAnimation", {
                     deathMessage: apiResponse.reason,
                 });
             } else {

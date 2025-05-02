@@ -11,7 +11,7 @@ const NavigateBtn = ({navigation, screenName, params, onPress, style, text, text
           await onPress();
         }
         await storeStringData('lastScreenName', screenName);
-        navigation.navigate(screenName, params);
+        navigation.replace(screenName, params);
       }}
     >
       <Text style={textStyle}>{text}</Text>
