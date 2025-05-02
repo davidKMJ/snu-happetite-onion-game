@@ -1,6 +1,7 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { View, Text } from "react-native";
+import NavigationBtn from "../components/Button";
 
 type DeathAnimationProps = StackScreenProps<
     RootStackParamList,
@@ -14,6 +15,7 @@ export const DeathAnimation = ({ route, navigation }: DeathAnimationProps) => {
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
             <Text>{deathMessage}</Text>
+            <NavigationBtn navigation={navigation} screenName="Onboarding" />
         </View>
     );
 };

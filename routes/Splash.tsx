@@ -4,6 +4,7 @@ import { getStringData } from "../utils/asyncUtils";
 import { StackNavigationProp, StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { Icon } from "../components/Icon";
+import { View } from "react-native";
 
 type SplashProps = StackScreenProps<RootStackParamList, "Splash">;
 
@@ -22,5 +23,7 @@ export const Splash = ({ route, navigation }: SplashProps) => {
         return () => clearTimeout(timer);
     }, [navigation]);
 
-    return <Icon />;
+    return <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgb(78, 102, 74)" }}>
+        <Icon />
+    </View>;
 };

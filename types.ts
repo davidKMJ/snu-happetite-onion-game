@@ -3,6 +3,9 @@ export interface NavigationProps {
     screenName: string;
     params?: any;
     onPress?: () => Promise<void>;
+    style?: any;
+    text?: string;
+    textStyle?: any;
 }
 
 export type RootStackParamList = {

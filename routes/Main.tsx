@@ -1,6 +1,6 @@
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
-import { Icon } from "../components/Icon";
-import { Onion } from "../components/Onion";
+import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
+import {StyleSheet} from 'react-native';
+import { OnionImages } from "../components/Onion";
 import { calculateDaysPassed } from "../utils/dateUtils";
 import { useEffect, useState } from "react";
 import NavigationBtn from "../components/Button";
@@ -25,10 +25,21 @@ export const Main = ({ route, navigation }: MainProps) => {
     const [text, setText] = useState("");
     const [isModalVisible, setModalVisible] = useState(false);
     const [apiResponse, setApiResponse] = useState<ApiResponse>({ score: 0 });
+    const [level, setLevel] = useState(0);
+    const [OnionImage, setOnionImage] = useState(OnionImages.GetImage(`onion0`));
     useEffect(() => {
         const calculateDays = async () => {
             const days = await calculateDaysPassed();
             setDaysPassed(days);
+            const lv = await getStringData("level");
+            if (lv) {
+                setLevel(parseInt(lv));
+            } else {
+                setLevel(0);
+            }
+            setOnionImage(OnionImages.GetImage(
+                `onion${level}`
+            ));
         };
         calculateDays();
     }, []);
@@ -70,36 +81,63 @@ export const Main = ({ route, navigation }: MainProps) => {
         }
     };
     return (
-        <View>
-            <Icon />
-            <Text>{daysPassed} days passed</Text>
-            <Text>api response score: {apiResponse.score}</Text>
-            <NavigationBtn navigation={navigation} screenName="ChatLog" />
-            <Onion />
+        <View style={{ marginLeft: 20, marginRight: 20 }}>
+            <Text style={styles.titleText}>
+                <Text style={styles.titleBoldText}>비난양파 </Text>
+                키우기
+            </Text>
+            <Text style={styles.daysText}>D+{daysPassed}</Text>
+            <Image source={OnionImage} style={{ width: 200, height: 200, marginBottom: 10, alignSelf: 'center' }} />
             <MessageModal isVisible={isModalVisible} message={text} />
-            <Text>name {name}</Text>
-            <Text>Type what you want to say to the onion</Text>
+            <Text style={styles.nameText}>{name}</Text>
+            <NavigationBtn 
+                navigation={navigation}
+                screenName="ChatLog"
+                text="채팅 로그"
+                style={{alignSelf: 'center', width: 80, height: 30, justifyContent: 'center', alignItems: 'center', marginTop: 10, borderColor: 'rgb(78, 102, 74)', borderWidth: 1, borderRadius: 15, marginBottom: '30%'}}
+                textStyle={{color: 'rgb(78, 102, 74)', fontSize: 15}}
+            />
+            <Text style={{alignSelf: 'center', marginBottom: '5%', position: 'absolute', bottom:'-30%'}}>양파에게 하고 싶은 말을 써보세요</Text>
             <TextInput
                 style={{
                     height: 40,
                     borderColor: "gray",
-                    borderWidth: 1,
-                    width: 200,
+                    borderWidth: 0,
+                    width: '80%',
+                    backgroundColor: "rgb(78, 102, 74)",
+                    borderRadius: 15,
+                    paddingLeft: 15,
+                    position: "absolute",
+                    left: 0,
+                    bottom: '-40%',
+                    color: "white",
+                    
                 }}
-                placeholder="Type your message"
+                placeholder="양파에게 욕하기"
+                placeholderTextColor={"white"}
                 onChangeText={(text) => setText(text)}
             />
             <TouchableOpacity
                 style={{
-                    backgroundColor: "blue",
+                    backgroundColor: "white",
                     padding: 10,
-                    borderRadius: 5,
+                    borderRadius: 20,
+                    position: "absolute",
+                    right: 0,
+                    width: 40,
+                    height: 40,
+                    bottom: '-40%',
+                    paddingTop: 5,
+                    borderColor: "rgb(78, 102, 74)",
+                    borderWidth: 3,
+              
                 }}
                 onPress={onPress}
             >
-                <Text style={{ color: "white" }}>Send</Text>
+                <Text style={{ color: "rgb(78, 102, 74)", fontSize: 20, fontWeight:'bold'}}>↑</Text>
             </TouchableOpacity>
-            <TouchableOpacity
+            {/* for debugging purposes only */}
+            {/* <TouchableOpacity
                 style={{
                     backgroundColor: "blue",
                     padding: 10,
@@ -108,7 +146,29 @@ export const Main = ({ route, navigation }: MainProps) => {
                 onPress={async () => await clearAllData()}
             >
                 <Text style={{ color: "white" }}>Purge All Data</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
         </View>
     );
 };
+
+
+const styles = StyleSheet.create({
+    titleText: {
+      fontSize: 30,
+      marginTop: 30,
+      marginBottom: 10,
+    },
+    titleBoldText: { 
+      fontWeight: 'bold',
+      color: 'rgb(78, 102, 74)'
+    },
+    daysText: {
+        fontSize: 25,
+        color: 'rgb(78, 102, 74)'
+    },
+    nameText: {
+        fontSize: 20,
+        marginTop: 10,
+        textAlign: 'center',
+    },
+  });
