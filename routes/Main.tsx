@@ -21,7 +21,7 @@ import AutoHeightImage from 'react-native-auto-height-image';
 type MainProps = StackScreenProps<RootStackParamList, "Main">;
 
 export const Main = ({ route, navigation }: MainProps) => {
-    const MAX_GROWTH = 20;
+    const MAX_GROWTH = 2;
     const GROWTH1 = 2;
     const GROWTH2 = 5;
     const GROWTH3 = 8;
@@ -88,10 +88,12 @@ export const Main = ({ route, navigation }: MainProps) => {
             );
             if (currentGrowth + newMessage.growth > MAX_GROWTH) {
                 navigation.replace("HarvestAnimation");
+                await storeStringData('lastScreenName', 'HarvestAnimation');
             } else if (newMessage.growth < 0) {
                 navigation.replace("DeathAnimation", {
                     deathMessage: apiResponse.reason,
                 });
+                await storeStringData('lastScreenName', 'DeathAnimation');
             } else {
                 const newGrowth = currentGrowth + newMessage.growth;
                 await storeStringData("currentGrowth", newGrowth.toString());
