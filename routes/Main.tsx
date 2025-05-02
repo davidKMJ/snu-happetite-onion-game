@@ -15,11 +15,17 @@ import {
 } from "../utils/asyncUtils";
 import { MessageModal } from "../components/Modal";
 import { analyzeNewMessage } from "../utils/apiUtils";
+import AutoHeightImage from 'react-native-auto-height-image';
 
 type MainProps = StackScreenProps<RootStackParamList, "Main">;
 
 export const Main = ({ route, navigation }: MainProps) => {
     const MAX_GROWTH = 20;
+    const GROWTH1 = 2;
+    const GROWTH2 = 5;
+    const GROWTH3 = 8;
+    const GROWTH4 = 12;
+    const GROWTH5 = 16;
     const { name } = route.params;
     const [daysPassed, setDaysPassed] = useState(0);
     const [text, setText] = useState("");
@@ -43,6 +49,20 @@ export const Main = ({ route, navigation }: MainProps) => {
         };
         calculateDays();
     }, []);
+    useEffect(() => {
+        const updateOnionImage = async () => {
+            const lv = await getStringData("level");
+            if (lv) {
+                setLevel(parseInt(lv));
+            } else {
+                setLevel(0);
+            }
+            setOnionImage(OnionImages.GetImage(
+                `onion${level}`
+            ));
+        };
+        updateOnionImage();
+    }, [level]);
     useEffect(() => {
         const timer = setTimeout(() => {
             setModalVisible(false);
@@ -75,29 +95,49 @@ export const Main = ({ route, navigation }: MainProps) => {
                 const newGrowth = currentGrowth + newMessage.growth;
                 await storeStringData("currentGrowth", newGrowth.toString());
                 setModalVisible(true);
+                if (newGrowth >= GROWTH1 && newGrowth < GROWTH2) {
+                    setLevel(1);
+                    await storeStringData("level", "1");
+                }
+                else if (newGrowth >= GROWTH2 && newGrowth < GROWTH3) {
+                    setLevel(2);
+                    await storeStringData("level", "2");
+                }
+                else if (newGrowth >= GROWTH3 && newGrowth < GROWTH4) {
+                    setLevel(3);
+                    await storeStringData("level", "3");
+                }
+                else if (newGrowth >= GROWTH4 && newGrowth < GROWTH5) {
+                    setLevel(4);
+                    await storeStringData("level", "4");
+                }
+                else if (newGrowth >= GROWTH5) {
+                    setLevel(5);
+                    await storeStringData("level", "5");
+                }
             }
         } else {
             console.log("Please enter a message before sending.");
         }
     };
     return (
-        <View style={{ marginLeft: 20, marginRight: 20 }}>
+        <View style={{ marginLeft: 20, marginRight: 20, height:'100%' }}>
             <Text style={styles.titleText}>
                 <Text style={styles.titleBoldText}>비난양파 </Text>
                 키우기
             </Text>
             <Text style={styles.daysText}>D+{daysPassed}</Text>
-            <Image source={OnionImage} style={{ width: 200, height: 200, marginBottom: 10, alignSelf: 'center' }} />
+            <AutoHeightImage source={OnionImage} width={200} style={{ marginBottom: 10, alignSelf: 'center', position: 'absolute', bottom: '40%' }} />
             <MessageModal isVisible={isModalVisible} message={text} />
             <Text style={styles.nameText}>{name}</Text>
             <NavigationBtn 
                 navigation={navigation}
                 screenName="ChatLog"
                 text="채팅 로그"
-                style={{alignSelf: 'center', width: 80, height: 30, justifyContent: 'center', alignItems: 'center', marginTop: 10, borderColor: 'rgb(78, 102, 74)', borderWidth: 1, borderRadius: 15, marginBottom: '30%'}}
+                style={{alignSelf: 'center', width: 80, height: 30, justifyContent: 'center', alignItems: 'center', marginTop: 10, borderColor: 'rgb(78, 102, 74)', borderWidth: 1, borderRadius: 15, position: 'absolute', bottom: '30%'}}
                 textStyle={{color: 'rgb(78, 102, 74)', fontSize: 15}}
             />
-            <Text style={{alignSelf: 'center', marginBottom: '5%', position: 'absolute', bottom:'-30%'}}>양파에게 하고 싶은 말을 써보세요</Text>
+            <Text style={{alignSelf: 'center', marginBottom: '5%', position: 'absolute', bottom:'13%'}}>양파에게 하고 싶은 말을 써보세요</Text>
             <TextInput
                 style={{
                     height: 40,
@@ -109,7 +149,7 @@ export const Main = ({ route, navigation }: MainProps) => {
                     paddingLeft: 15,
                     position: "absolute",
                     left: 0,
-                    bottom: '-40%',
+                    bottom: '10%',
                     color: "white",
                     
                 }}
@@ -126,7 +166,7 @@ export const Main = ({ route, navigation }: MainProps) => {
                     right: 0,
                     width: 40,
                     height: 40,
-                    bottom: '-40%',
+                    bottom: '10%',
                     paddingTop: 5,
                     borderColor: "rgb(78, 102, 74)",
                     borderWidth: 3,
@@ -170,5 +210,8 @@ const styles = StyleSheet.create({
         fontSize: 20,
         marginTop: 10,
         textAlign: 'center',
+        position: 'absolute', 
+        bottom: '37%',
+        width: '100%',
     },
   });
