@@ -13,7 +13,7 @@ export type RootStackParamList = {
     Onboarding: undefined;
     Main: { name: string };
     ChatLog: undefined;
-    DeathAnimation: { deathMessage: string | undefined };
+    DeathAnimation: { deathMessage?: string | undefined };
     Death: undefined;
     Harvest: undefined;
     HarvestAnimation: undefined;

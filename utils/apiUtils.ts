@@ -1,18 +1,30 @@
 import Constants from "expo-constants";
 
 export const analyzeNewMessage = async (phrase: string) => {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${Constants.expoConfig?.extra?.openaiApiKey}`,
-        },
-        body: JSON.stringify({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "user",
-                    content: `
+    const apiKey = Constants.expoConfig?.extra?.openaiApiKey;
+    console.log("API Key present:", !!apiKey);
+
+    if (!apiKey) {
+        console.error("No API key found in environment variables");
+        return { score: 0 };
+    }
+
+    try {
+        console.log("Making API request...");
+        const response = await fetch(
+            "https://api.openai.com/v1/chat/completions",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${apiKey}`,
+                },
+                body: JSON.stringify({
+                    model: "gpt-4o",
+                    messages: [
+                        {
+                            role: "user",
+                            content: `
 You are a comedic AI that analyzes the sentiment of Korean phrases.
 
 In this game, the character is an onion. The more insults or mean words it receives, the more it grows. But when someone says something nice or kind, the onion gets so embarrassed that it dies. Literally.
@@ -29,7 +41,7 @@ Your job is to analyze the Korean phrase and return a "growth score" from -1.0 t
 - **Positive score (0, 1]** → This means the phrase is *negative* (mean, harsh).
   - In this case, return ONLY the score.
 
-⚠️ Respond strictly using this exact format (do not add any intro, markdown, or explanation):
+⚠️ Respond strictly using this exact format (do not add any intro, markdown, \`\`\` mark to indicate code block, or explanation):
 
 For positive phrases:
 {
@@ -44,20 +56,47 @@ For negative phrases:
 
 Now analyze this Korean phrase: "${phrase}"
                     `,
-                },
-            ],
-            temperature: 0.5,
-        }),
-    });
+                        },
+                    ],
+                    temperature: 0.5,
+                }),
+            }
+        );
 
-    const data = await response.json();
-    const text = data.choices[0].message.content;
+        console.log("Response status:", response.status);
 
-    try {
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("API Error:", errorData);
+            return { score: 0 };
+        }
+
+        const data = await response.json();
+        console.log("Response data:", data);
+
+        if (!data.choices?.[0]?.message?.content) {
+            console.error("Invalid API response format:", data);
+            return { score: 0 };
+        }
+
+        const text = data.choices[0].message.content;
+        console.log("Parsed content:", text);
+
         const parsed = JSON.parse(text);
+
+        if (typeof parsed.score !== "number") {
+            console.error("Invalid score in response:", parsed);
+            return { score: 0 };
+        }
+
         return parsed;
     } catch (e) {
-        console.error("Failed JSON parsing:", text);
-        return null;
+        console.error("Error in analyzeNewMessage:", e);
+        if (e instanceof TypeError && e.message === "Network request failed") {
+            console.error(
+                "Network error - please check your internet connection and API endpoint accessibility"
+            );
+        }
+        return { score: 0 };
     }
 };

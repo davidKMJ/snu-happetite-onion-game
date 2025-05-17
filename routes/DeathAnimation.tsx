@@ -1,7 +1,9 @@
 import { StackScreenProps } from "@react-navigation/stack";
-import { Message, RootStackParamList } from "../types";
-import { View, Text, Dimensions, Image } from "react-native";
-import { useEffect, useState } from "react";
+import { RootStackParamList } from "../types";
+import { View, Text, StyleSheet, Animated, Dimensions, Image } from "react-native";
+import { useEffect, useRef } from "react";
+import onionDeath from "../assets/onion_death.png";
+import { storeStringData } from "../utils/asyncUtils";
 
 type DeathAnimationProps = StackScreenProps<
     RootStackParamList,
@@ -9,28 +11,93 @@ type DeathAnimationProps = StackScreenProps<
 >;
 
 export const DeathAnimation = ({ route, navigation }: DeathAnimationProps) => {
+    const { deathMessage } = route.params;
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const scaleAnim = useRef(new Animated.Value(0.5)).current;
     const { width: imgWidth, height: imgHeight } = Image.resolveAssetSource(require("../assets/onion_harvest_animation.png"));
     const screenWidth = Dimensions.get("window").width;
     const aspectRatio = imgHeight / imgWidth;
     const height = screenWidth * 0.5 * aspectRatio;
+
     useEffect(() => {
+        // Fade in animation
+        Animated.sequence([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 1000,
+                useNativeDriver: true,
+            }),
+            Animated.timing(scaleAnim, {
+                toValue: 1,
+                duration: 1000,
+                useNativeDriver: true,
+            }),
+        ]).start();
+
+        // Navigate to Death screen after animation
         const timer = setTimeout(() => {
-            navigation.replace("Harvest");
-        }, 3000);
+            storeStringData("lastScreenName", "Death");
+            navigation.replace("Death");
+        }, 5000);
+
         return () => clearTimeout(timer);
     }, []);
+
     return (
-        <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgb(78, 102, 74)" }}
-        >
-            <Image
-                source={require("../assets/onion_harvest_animation.png")}
-                style={{ width: screenWidth * 0.5, height: height, alignSelf: 'center', position: 'absolute', bottom: '40%' }}
-            />
-            <View style={{alignContent: 'center', justifyContent: 'center', alignItems: 'center', position: 'absolute', bottom: '20%', width: '60%', backgroundColor: 'white', height:'8%', borderRadius: 20, borderColor: 'rgb(78, 102, 74)', borderWidth: 3}}>
-                <Text style={{color:'rgb(78, 102, 74)', fontSize:17}}>ㅋㅎㅋㅎㅋ 앗?</Text>
-                <Text style={{color:'rgb(78, 102, 74)', fontSize:17}}>뭔가 쑥쓰러워... ㅎㅎ</Text>
-            </View>
+        <View style={styles.container}>
+            <Animated.View
+                style={[
+                    styles.content,
+                    {
+                        opacity: fadeAnim,
+                        transform: [{ scale: scaleAnim }],
+                    },
+                ]}
+            >
+                <Image
+                    source={require("../assets/onion_harvest_animation.png")}
+                    style={{ width: screenWidth * 0.5, height: height, marginBottom: 20 }}
+                />
+                <View style={styles.messageContainer}>
+                    <Text style={styles.message}>{deathMessage}</Text>
+                </View>
+            </Animated.View>
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "rgb(78, 102, 74)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    content: {
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    image: {
+        marginBottom: 20,
+    },
+    messageContainer: {
+        backgroundColor: "white",
+        padding: 20,
+        borderRadius: 15,
+        width: "80%",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    message: {
+        color: "rgb(78, 102, 74)",
+        fontSize: 16,
+        textAlign: "center",
+        lineHeight: 24,
+    },
+});
