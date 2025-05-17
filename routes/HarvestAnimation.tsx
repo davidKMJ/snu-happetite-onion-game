@@ -1,33 +1,88 @@
 import { StackScreenProps } from "@react-navigation/stack";
-import { Message, RootStackParamList } from "../types";
-import { View, Text } from "react-native";
-import NavigationBtn from "../components/Button";
-import { useEffect, useState } from "react";
-import { getObjectData, getStringData } from "../utils/asyncUtils";
+import { RootStackParamList } from "../types";
+import { View, Text, StyleSheet, Animated } from "react-native";
+import { useEffect, useRef } from "react";
 import AutoHeightImage from "react-native-auto-height-image";
-import image from "../assets/onion_harvest.png";
+import onionHarvest from "../assets/onion_harvest.png";
 
 type HarvestAnimationProps = StackScreenProps<
     RootStackParamList,
     "HarvestAnimation"
 >;
 
-export const HarvestAnimation = ({ route, navigation }: HarvestAnimationProps) => {
+export const HarvestAnimation = ({ navigation }: HarvestAnimationProps) => {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const scaleAnim = useRef(new Animated.Value(0.5)).current;
+
     useEffect(() => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 1000,
+                useNativeDriver: true,
+            }),
+            Animated.spring(scaleAnim, {
+                toValue: 1,
+                friction: 8,
+                tension: 40,
+                useNativeDriver: true,
+            }),
+        ]).start();
+
         const timer = setTimeout(() => {
             navigation.replace("Harvest");
         }, 3000);
+
         return () => clearTimeout(timer);
     }, []);
+
     return (
-        <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgb(78, 102, 74)" }}
-        >
-            <AutoHeightImage source={image as any} width={200} style={{ marginBottom: 10, alignSelf: 'center', position: 'absolute', bottom: '40%'}} />
-            <View style={{alignContent: 'center', justifyContent: 'center', alignItems: 'center', position: 'absolute', bottom: '20%', width: '60%', backgroundColor: 'white', height:'8%', borderRadius: 20, borderColor: 'rgb(78, 102, 74)', borderWidth: 3}}>
-                <Text style={{color:'rgb(78, 102, 74)', fontSize:17}}>... ... 오잉!?</Text>
-                <Text style={{color:'rgb(78, 102, 74)', fontSize:17}}>비난 양파의 상태가... ...!</Text>
-            </View>
+        <View style={styles.container}>
+            <Animated.View
+                style={[
+                    styles.content,
+                    {
+                        opacity: fadeAnim,
+                        transform: [{ scale: scaleAnim }],
+                    },
+                ]}
+            >
+                <AutoHeightImage
+                    source={onionHarvest as any}
+                    width={200}
+                    style={styles.image}
+                />
+                <Text style={styles.message}>축하합니다!</Text>
+                <Text style={styles.subMessage}>
+                    양파가 무사히 수확되었습니다
+                </Text>
+            </Animated.View>
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "rgb(78, 102, 74)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    content: {
+        alignItems: "center",
+    },
+    image: {
+        marginBottom: 20,
+    },
+    message: {
+        fontSize: 32,
+        fontWeight: "bold",
+        color: "white",
+        marginBottom: 10,
+    },
+    subMessage: {
+        fontSize: 18,
+        color: "white",
+        textAlign: "center",
+    },
+});

@@ -1,6 +1,15 @@
-import { View, Text, TextInput, TouchableOpacity, LogBox } from "react-native";
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    LogBox,
+    StyleSheet,
+    Dimensions,
+    Platform,
+    SafeAreaView,
+} from "react-native";
 LogBox.ignoreAllLogs();
-import {StyleSheet} from 'react-native';
 import { OnionImages } from "../components/Onion";
 import { calculateDaysPassed } from "../utils/dateUtils";
 import { useEffect, useState } from "react";
@@ -16,205 +25,322 @@ import {
 } from "../utils/asyncUtils";
 import { MessageModal } from "../components/Modal";
 import { analyzeNewMessage } from "../utils/apiUtils";
-import AutoHeightImage from 'react-native-auto-height-image';
+import AutoHeightImage from "react-native-auto-height-image";
+
+const GROWTH_THRESHOLDS = {
+    MAX: 20,
+    LEVEL1: 2,
+    LEVEL2: 5,
+    LEVEL3: 8,
+    LEVEL4: 12,
+    LEVEL5: 16,
+} as const;
 
 type MainProps = StackScreenProps<RootStackParamList, "Main">;
 
 export const Main = ({ route, navigation }: MainProps) => {
-    const MAX_GROWTH = 2;
-    const GROWTH1 = 2;
-    const GROWTH2 = 5;
-    const GROWTH3 = 8;
-    const GROWTH4 = 12;
-    const GROWTH5 = 16;
     const { name } = route.params;
     const [daysPassed, setDaysPassed] = useState(0);
     const [text, setText] = useState("");
     const [isModalVisible, setModalVisible] = useState(false);
     const [apiResponse, setApiResponse] = useState<ApiResponse>({ score: 0 });
     const [level, setLevel] = useState(0);
-    const [OnionImage, setOnionImage] = useState(OnionImages.GetImage(`onion0`));
+    const [onionImage, setOnionImage] = useState(
+        OnionImages.GetImage(`onion0`)
+    );
+
+    const updateOnionImage = async () => {
+        const lv = await getStringData("level");
+        const newLevel = lv ? parseInt(lv) : 0;
+        setLevel(newLevel);
+        setOnionImage(OnionImages.GetImage(`onion${newLevel}`));
+    };
+
     useEffect(() => {
         const calculateDays = async () => {
             const days = await calculateDaysPassed();
             setDaysPassed(days);
-            const lv = await getStringData("level");
-            if (lv) {
-                setLevel(parseInt(lv));
-            } else {
-                setLevel(0);
-            }
-            setOnionImage(OnionImages.GetImage(
-                `onion${level}`
-            ));
+            await updateOnionImage();
         };
         calculateDays();
     }, []);
+
     useEffect(() => {
-        const updateOnionImage = async () => {
-            const lv = await getStringData("level");
-            if (lv) {
-                setLevel(parseInt(lv));
-            } else {
-                setLevel(0);
-            }
-            setOnionImage(OnionImages.GetImage(
-                `onion${level}`
-            ));
-        };
         updateOnionImage();
     }, [level]);
+
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setModalVisible(false);
-        }, 2000);
+        const timer = setTimeout(() => setModalVisible(false), 2000);
         return () => clearTimeout(timer);
     }, [isModalVisible]);
+
     const onPress = async () => {
-        if (text) {
-            const messageLog =
-                (await getObjectData("messageLog")) || ([] as Message[]);
-            const apiResponse = (await analyzeNewMessage(text)) as ApiResponse;
-            const newMessage = {
-                text: text,
-                growth: apiResponse.score,
-                date: new Date(),
-            };
-            setApiResponse(apiResponse);
-            messageLog.push(newMessage);
-            await storeObjectData("messageLog", messageLog);
-            const currentGrowth = parseFloat(
-                (await getStringData("currentGrowth")) || "0"
-            );
-            if (currentGrowth + newMessage.growth > MAX_GROWTH) {
-                navigation.replace("HarvestAnimation");
-                await storeStringData('lastScreenName', 'HarvestAnimation');
-            } else if (newMessage.growth < 0) {
-                navigation.replace("DeathAnimation", {
-                    deathMessage: apiResponse.reason,
-                });
-                await storeStringData('lastScreenName', 'DeathAnimation');
-            } else {
-                const newGrowth = currentGrowth + newMessage.growth;
-                await storeStringData("currentGrowth", newGrowth.toString());
-                setModalVisible(true);
-                if (newGrowth >= GROWTH1 && newGrowth < GROWTH2) {
-                    setLevel(1);
-                    await storeStringData("level", "1");
-                }
-                else if (newGrowth >= GROWTH2 && newGrowth < GROWTH3) {
-                    setLevel(2);
-                    await storeStringData("level", "2");
-                }
-                else if (newGrowth >= GROWTH3 && newGrowth < GROWTH4) {
-                    setLevel(3);
-                    await storeStringData("level", "3");
-                }
-                else if (newGrowth >= GROWTH4 && newGrowth < GROWTH5) {
-                    setLevel(4);
-                    await storeStringData("level", "4");
-                }
-                else if (newGrowth >= GROWTH5) {
-                    setLevel(5);
-                    await storeStringData("level", "5");
-                }
-            }
-        } else {
+        if (!text) {
             console.log("Please enter a message before sending.");
+            return;
+        }
+
+        const messageLog =
+            (await getObjectData("messageLog")) || ([] as Message[]);
+        const apiResponse = (await analyzeNewMessage(text)) as ApiResponse;
+        const newMessage = {
+            text,
+            growth: apiResponse.score,
+            date: new Date(),
+        };
+
+        setApiResponse(apiResponse);
+        messageLog.push(newMessage);
+        await storeObjectData("messageLog", messageLog);
+
+        const currentGrowth = parseFloat(
+            (await getStringData("currentGrowth")) || "0"
+        );
+        const totalGrowth = currentGrowth + newMessage.growth;
+
+        setText("");
+
+        if (totalGrowth > GROWTH_THRESHOLDS.MAX) {
+            await storeStringData("lastScreenName", "HarvestAnimation");
+            navigation.replace("HarvestAnimation");
+        } else if (newMessage.growth < 0) {
+            await storeStringData("lastScreenName", "DeathAnimation");
+            navigation.replace("DeathAnimation", {
+                deathMessage: apiResponse.reason,
+            });
+        } else {
+            await storeStringData("currentGrowth", totalGrowth.toString());
+
+            if (totalGrowth >= GROWTH_THRESHOLDS.LEVEL5) {
+                setLevel(5);
+                await storeStringData("level", "5");
+            } else if (totalGrowth >= GROWTH_THRESHOLDS.LEVEL4) {
+                setLevel(4);
+                await storeStringData("level", "4");
+            } else if (totalGrowth >= GROWTH_THRESHOLDS.LEVEL3) {
+                setLevel(3);
+                await storeStringData("level", "3");
+            } else if (totalGrowth >= GROWTH_THRESHOLDS.LEVEL2) {
+                setLevel(2);
+                await storeStringData("level", "2");
+            } else if (totalGrowth >= GROWTH_THRESHOLDS.LEVEL1) {
+                setLevel(1);
+                await storeStringData("level", "1");
+            }
         }
     };
+
     return (
-        <View style={{ marginLeft: 20, marginRight: 20, height:'100%' }}>
-            <Text style={styles.titleText}>
-                <Text style={styles.titleBoldText}>비난양파 </Text>
-                키우기
-            </Text>
-            <Text style={styles.daysText}>D+{daysPassed}</Text>
-            <AutoHeightImage source={OnionImage} width={200} style={{ marginBottom: 10, alignSelf: 'center', position: 'absolute', bottom: '40%' }} />
-            <MessageModal isVisible={isModalVisible} message={text} />
-            <Text style={styles.nameText}>{name}</Text>
-            <NavigationBtn 
-                navigation={navigation}
-                screenName="ChatLog"
-                text="채팅 로그"
-                style={{alignSelf: 'center', width: 80, height: 30, justifyContent: 'center', alignItems: 'center', marginTop: 10, borderColor: 'rgb(78, 102, 74)', borderWidth: 1, borderRadius: 15, position: 'absolute', bottom: '30%'}}
-                textStyle={{color: 'rgb(78, 102, 74)', fontSize: 15}}
-            />
-            <Text style={{alignSelf: 'center', marginBottom: '5%', position: 'absolute', bottom:'13%'}}>양파에게 하고 싶은 말을 써보세요</Text>
-            <TextInput
-                style={{
-                    height: 40,
-                    borderColor: "gray",
-                    borderWidth: 0,
-                    width: '80%',
-                    backgroundColor: "rgb(78, 102, 74)",
-                    borderRadius: 15,
-                    paddingLeft: 15,
-                    position: "absolute",
-                    left: 0,
-                    bottom: '10%',
-                    color: "white",
-                    
-                }}
-                placeholder="양파에게 욕하기"
-                placeholderTextColor={"white"}
-                onChangeText={(text) => setText(text)}
-            />
-            <TouchableOpacity
-                style={{
-                    backgroundColor: "white",
-                    padding: 10,
-                    borderRadius: 20,
-                    position: "absolute",
-                    right: 0,
-                    width: 40,
-                    height: 40,
-                    bottom: '10%',
-                    paddingTop: 5,
-                    borderColor: "rgb(78, 102, 74)",
-                    borderWidth: 3,
-              
-                }}
-                onPress={onPress}
-            >
-                <Text style={{ color: "rgb(78, 102, 74)", fontSize: 20, fontWeight:'bold'}}>↑</Text>
-            </TouchableOpacity>
-            {/* for debugging purposes only */}
-            {/* <TouchableOpacity
-                style={{
-                    backgroundColor: "blue",
-                    padding: 10,
-                    borderRadius: 5,
-                }}
-                onPress={async () => await clearAllData()}
-            >
-                <Text style={{ color: "white" }}>Purge All Data</Text>
-            </TouchableOpacity> */}
-        </View>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.header}>
+                <View style={styles.titleContainer}>
+                    <Text style={styles.titleText}>
+                        <Text style={styles.titleBoldText}>비난양파 </Text>
+                        키우기
+                    </Text>
+                    <Text style={styles.daysText}>D+{daysPassed}</Text>
+                </View>
+                <TouchableOpacity
+                    style={styles.debugButton}
+                    onPress={clearAllData}
+                >
+                    <Text style={styles.debugButtonText}>초기화</Text>
+                </TouchableOpacity>
+            </View>
+
+            <View style={styles.mainContent}>
+                <View style={styles.onionContainer}>
+                    <AutoHeightImage
+                        source={onionImage}
+                        width={200}
+                        style={styles.onionImage}
+                    />
+                    <Text style={styles.nameText}>{name}</Text>
+                </View>
+
+                <MessageModal isVisible={isModalVisible} message={text} />
+
+                <View style={styles.bottomContainer}>
+                    <NavigationBtn
+                        navigation={navigation}
+                        screenName="ChatLog"
+                        text="채팅 로그"
+                        style={styles.chatLogButton}
+                        textStyle={styles.chatLogButtonText}
+                    />
+
+                    <Text style={styles.inputLabel}>
+                        양파에게 하고 싶은 말을 써보세요
+                    </Text>
+
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                            style={styles.textInput}
+                            placeholder="양파에게 욕하기"
+                            placeholderTextColor="rgba(78, 102, 74, 0.5)"
+                            onChangeText={setText}
+                            value={text}
+                        />
+                        <TouchableOpacity
+                            style={[
+                                styles.sendButton,
+                                !text.trim() && styles.sendButtonDisabled,
+                            ]}
+                            onPress={onPress}
+                            disabled={!text.trim()}
+                        >
+                            <Text style={styles.sendButtonText}>↑</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        </SafeAreaView>
     );
 };
 
-
 const styles = StyleSheet.create({
-    titleText: {
-      fontSize: 30,
-      marginTop: 30,
-      marginBottom: 10,
+    container: {
+        flex: 1,
+        backgroundColor: "#F8F8F8",
     },
-    titleBoldText: { 
-      fontWeight: 'bold',
-      color: 'rgb(78, 102, 74)'
+    header: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingHorizontal: 20,
+        paddingTop: Platform.OS === "ios" ? 20 : 40,
+        paddingBottom: 20,
+        backgroundColor: "white",
+        borderBottomWidth: 1,
+        borderBottomColor: "rgba(78, 102, 74, 0.1)",
+    },
+    titleContainer: {
+        flex: 1,
+    },
+    titleText: {
+        fontSize: 28,
+        color: "#333",
+    },
+    titleBoldText: {
+        fontWeight: "700",
+        color: "rgb(78, 102, 74)",
     },
     daysText: {
-        fontSize: 25,
-        color: 'rgb(78, 102, 74)'
+        fontSize: 22,
+        color: "rgb(78, 102, 74)",
+        marginTop: 8,
+    },
+    mainContent: {
+        flex: 1,
+        paddingHorizontal: 20,
+        justifyContent: "space-between",
+    },
+    onionContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        maxHeight: "60%",
+    },
+    onionImage: {
+        marginBottom: 20,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 8,
     },
     nameText: {
         fontSize: 20,
-        marginTop: 10,
-        textAlign: 'center',
-        position: 'absolute', 
-        bottom: '37%',
-        width: '100%',
+        color: "#666",
+        fontWeight: "500",
     },
-  });
+    bottomContainer: {
+        paddingBottom: 20,
+    },
+    chatLogButton: {
+        alignSelf: "center",
+        width: 100,
+        height: 40,
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 20,
+        borderColor: "rgb(78, 102, 74)",
+        borderWidth: 1.5,
+        borderRadius: 20,
+        backgroundColor: "white",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 4,
+    },
+    chatLogButtonText: {
+        color: "rgb(78, 102, 74)",
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    inputLabel: {
+        textAlign: "center",
+        marginBottom: 10,
+        color: "#666",
+        fontSize: 15,
+    },
+    inputContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "white",
+        borderRadius: 25,
+        paddingHorizontal: 15,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 4,
+        borderWidth: 1,
+        borderColor: "rgba(78, 102, 74, 0.2)",
+    },
+    textInput: {
+        flex: 1,
+        height: 50,
+        paddingHorizontal: 10,
+        color: "#333",
+        fontSize: 16,
+    },
+    sendButton: {
+        width: 40,
+        height: 40,
+        backgroundColor: "rgb(78, 102, 74)",
+        borderRadius: 20,
+        justifyContent: "center",
+        alignItems: "center",
+        marginLeft: 10,
+    },
+    sendButtonDisabled: {
+        backgroundColor: "rgba(78, 102, 74, 0.5)",
+    },
+    sendButtonText: {
+        color: "white",
+        fontSize: 20,
+        fontWeight: "bold",
+    },
+    debugButton: {
+        backgroundColor: "#FF6B6B",
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 15,
+    },
+    debugButtonText: {
+        color: "white",
+        fontSize: 12,
+        fontWeight: "500",
+    },
+});
