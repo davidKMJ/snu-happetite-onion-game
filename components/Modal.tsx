@@ -3,17 +3,18 @@ import { Text } from "react-native"
 
 type MessageModalProps = {
     isVisible: boolean,
-    message: string
+    message: string,
+    style?: any
 }
 
-export const MessageModal = ({isVisible, message}: MessageModalProps) => {
+export const MessageModal = ({isVisible, message, style}: MessageModalProps) => {
     return (
         <Modal
             animationType="slide"
             transparent={true}
             visible={isVisible}
         > 
-            <Text>you sent: {message}</Text>
+            <Text style={style}>you sent: {message}</Text>
         </Modal>
     )
 }

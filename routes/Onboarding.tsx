@@ -12,7 +12,8 @@ import {
     Dimensions,
     SafeAreaView,
     Platform,
-    Image
+    Image,
+    KeyboardAvoidingView
 } from "react-native";
 import onion0 from "../assets/onion0.png";
 
@@ -37,10 +38,10 @@ export const Onboarding = ({ navigation }: OnboardingProps) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={20} style={styles.content}>
                 <Image
                     source={onion0}
-                    style={{ width: 200, height: height, alignSelf: 'center', position: 'absolute', bottom: '70%', marginBottom: 30 }}
+                    style={{ width: 200, height: height, marginBottom: 30 }}
                 />
                 <Text style={styles.title}>비난양파 키우기</Text>
                 <Text style={styles.subtitle}>
@@ -64,7 +65,7 @@ export const Onboarding = ({ navigation }: OnboardingProps) => {
                 >
                     <Text style={styles.buttonText}>시작하기</Text>
                 </TouchableOpacity>
-            </View>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 };

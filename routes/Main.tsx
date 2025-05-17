@@ -7,6 +7,7 @@ import {
     StyleSheet,
     Platform,
     SafeAreaView,
+    KeyboardAvoidingView,
 } from "react-native";
 LogBox.ignoreAllLogs();
 import { OnionImages } from "../components/Onion";
@@ -68,7 +69,7 @@ export const Main = ({ route, navigation }: MainProps) => {
     }, [level]);
 
     useEffect(() => {
-        const timer = setTimeout(() => setModalVisible(false), 2000);
+        const timer = setTimeout(() => {setModalVisible(false); setText("")}, 2000);
         return () => clearTimeout(timer);
     }, [isModalVisible]);
 
@@ -95,8 +96,7 @@ export const Main = ({ route, navigation }: MainProps) => {
             (await getStringData("currentGrowth")) || "0"
         );
         const totalGrowth = currentGrowth + newMessage.growth;
-
-        setText("");
+        setModalVisible(true);
 
         if (totalGrowth > GROWTH_THRESHOLDS.MAX) {
             await storeStringData("lastScreenName", "HarvestAnimation");
@@ -164,9 +164,9 @@ export const Main = ({ route, navigation }: MainProps) => {
                     <Text style={styles.nameText}>{name}</Text>
                 </View>
 
-                <MessageModal isVisible={isModalVisible} message={text} />
+                <MessageModal isVisible={isModalVisible} message={text} style={styles.messageModal} />
 
-                <View style={styles.bottomContainer}>
+                <KeyboardAvoidingView style={styles.bottomContainer} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={200}>
                     <NavigationBtn
                         navigation={navigation}
                         screenName="ChatLog"
@@ -198,13 +198,19 @@ export const Main = ({ route, navigation }: MainProps) => {
                             <Text style={styles.sendButtonText}>↑</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </KeyboardAvoidingView>
             </View>
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
+    messageModal: {
+        position: "absolute",
+        top: "50%",
+        justifyContent: "center",
+        alignItems: "center",
+    },
     container: {
         flex: 1,
         backgroundColor: "#F8F8F8",
