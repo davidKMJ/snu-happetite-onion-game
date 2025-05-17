@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, LogBox, Dimensions } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, LogBox, Dimensions, Image } from "react-native";
 LogBox.ignoreAllLogs();
 import {StyleSheet} from 'react-native';
 import { OnionImages } from "../components/Onion";
@@ -123,6 +123,9 @@ export const Main = ({ route, navigation }: MainProps) => {
         }
     };
     const screenWidth = Dimensions.get('window').width;
+    const { width: imgWidth, height: imgHeight } = Image.resolveAssetSource(OnionImage);
+    const aspectRatio = imgHeight / imgWidth;
+    const height = screenWidth * 0.5 * aspectRatio;
     return (
         <View style={{ marginLeft: 20, marginRight: 20, height:'100%' }}>
             <Text style={styles.titleText}>
@@ -130,7 +133,10 @@ export const Main = ({ route, navigation }: MainProps) => {
                 키우기
             </Text>
             <Text style={styles.daysText}>D+{daysPassed}</Text>
-            <AutoHeightImage source={OnionImage} width={screenWidth*0.5} bottom={'40%'} />
+            <Image
+                source={OnionImage}
+                style={{ width: screenWidth * 0.5, height: height, alignSelf: 'center', position: 'absolute', bottom: '70%' }}
+            />
             <MessageModal isVisible={isModalVisible} message={text} />
             <Text style={styles.nameText}>{name}</Text>
             <NavigationBtn 
