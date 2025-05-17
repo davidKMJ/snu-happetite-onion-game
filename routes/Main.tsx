@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, LogBox } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, LogBox, Dimensions } from "react-native";
 LogBox.ignoreAllLogs();
 import {StyleSheet} from 'react-native';
 import { OnionImages } from "../components/Onion";
@@ -16,12 +16,11 @@ import {
 } from "../utils/asyncUtils";
 import { MessageModal } from "../components/Modal";
 import { analyzeNewMessage } from "../utils/apiUtils";
-import AutoHeightImage from 'react-native-auto-height-image';
 
 type MainProps = StackScreenProps<RootStackParamList, "Main">;
 
 export const Main = ({ route, navigation }: MainProps) => {
-    const MAX_GROWTH = 2;
+    const MAX_GROWTH = 20;
     const GROWTH1 = 2;
     const GROWTH2 = 5;
     const GROWTH3 = 8;
@@ -123,6 +122,7 @@ export const Main = ({ route, navigation }: MainProps) => {
             console.log("Please enter a message before sending.");
         }
     };
+    const screenWidth = Dimensions.get('window').width;
     return (
         <View style={{ marginLeft: 20, marginRight: 20, height:'100%' }}>
             <Text style={styles.titleText}>
@@ -130,7 +130,7 @@ export const Main = ({ route, navigation }: MainProps) => {
                 키우기
             </Text>
             <Text style={styles.daysText}>D+{daysPassed}</Text>
-            <AutoHeightImage source={OnionImage} width={200} style={{ marginBottom: 10, alignSelf: 'center', position: 'absolute', bottom: '40%' }} />
+            <AutoHeightImage source={OnionImage} width={screenWidth*0.5} bottom={'40%'} />
             <MessageModal isVisible={isModalVisible} message={text} />
             <Text style={styles.nameText}>{name}</Text>
             <NavigationBtn 
