@@ -13,7 +13,9 @@ import {
     SafeAreaView,
     Platform,
     Image,
-    KeyboardAvoidingView
+    KeyboardAvoidingView,
+    TouchableWithoutFeedback,
+    Keyboard,
 } from "react-native";
 import onion0 from "../assets/onion0.png";
 
@@ -37,6 +39,7 @@ export const Onboarding = ({ navigation }: OnboardingProps) => {
     const height = 200 * aspectRatio;
 
     return (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <SafeAreaView style={styles.container}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={20} style={styles.content}>
                 <Image
@@ -67,6 +70,7 @@ export const Onboarding = ({ navigation }: OnboardingProps) => {
                 </TouchableOpacity>
             </KeyboardAvoidingView>
         </SafeAreaView>
+        </TouchableWithoutFeedback>
     );
 };
 

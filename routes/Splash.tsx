@@ -1,7 +1,6 @@
-import { useNavigation } from "@react-navigation/native";
 import { useEffect } from "react";
 import { getStringData, storeStringData } from "../utils/asyncUtils";
-import { StackNavigationProp, StackScreenProps } from "@react-navigation/stack";
+import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { Icon } from "../components/Icon";
 import { View } from "react-native";

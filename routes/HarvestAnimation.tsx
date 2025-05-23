@@ -2,7 +2,6 @@ import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { View, Text, StyleSheet, Animated, Dimensions, Image } from "react-native";
 import { useEffect, useRef } from "react";
-import onionHarvest from "../assets/onion_harvest.png";
 import { storeStringData } from "../utils/asyncUtils";
 
 type HarvestAnimationProps = StackScreenProps<

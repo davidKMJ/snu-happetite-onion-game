@@ -17,7 +17,6 @@ import {
     getObjectData,
 } from "../utils/asyncUtils";
 import { calculateDaysPassed, formatDate } from "../utils/dateUtils";
-import onionHarvest from "../assets/onion_harvest.png";
 import { Message } from "../types";
 import * as Clipboard from "expo-clipboard";
 import NavigateBtn from "../components/Button";

@@ -8,6 +8,8 @@ import {
     Platform,
     SafeAreaView,
     KeyboardAvoidingView,
+    Keyboard,
+    TouchableWithoutFeedback,
 } from "react-native";
 LogBox.ignoreAllLogs();
 import { OnionImages } from "../components/Onion";
@@ -134,6 +136,7 @@ export const Main = ({ route, navigation }: MainProps) => {
     const height = screenWidth * 0.5 * aspectRatio;
 
     return (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <View style={styles.titleContainer}>
@@ -204,6 +207,7 @@ export const Main = ({ route, navigation }: MainProps) => {
                 </KeyboardAvoidingView>
             </View>
         </SafeAreaView>
+        </TouchableWithoutFeedback>
     );
 };
 

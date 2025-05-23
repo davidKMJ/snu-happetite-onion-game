@@ -1,6 +1,6 @@
 import { NavigationProps } from "../types";
 import { storeStringData } from "../utils/asyncUtils";
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
+import { Text, TouchableOpacity } from "react-native";
 
 const NavigateBtn = ({navigation, screenName, params, onPress, style, text, textStyle}: NavigationProps) => {
   return (

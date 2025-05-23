@@ -2,18 +2,16 @@ import { StackScreenProps } from "@react-navigation/stack";
 import { Message, RootStackParamList } from "../types";
 import { useEffect, useState } from "react";
 import { getObjectData, getStringData } from "../utils/asyncUtils";
-import { formatDate, getTimeAgo } from "../utils/dateUtils";
+import { getTimeAgo } from "../utils/dateUtils";
 import {
     View,
     Text,
     StyleSheet,
     ScrollView,
-    TouchableOpacity,
     SafeAreaView,
     Platform,
 } from "react-native";
 import NavigateBtn from "../components/Button";
-import AutoHeightImage from "react-native-auto-height-image";
 
 type ChatLogProps = StackScreenProps<RootStackParamList, "ChatLog">;
 

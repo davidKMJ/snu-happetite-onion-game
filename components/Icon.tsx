@@ -1,4 +1,4 @@
-import { TextInput ,Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, View } from 'react-native';
 
 export const Icon = () => {
     return (

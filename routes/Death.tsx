@@ -1,21 +1,18 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { useEffect, useState } from "react";
-import { clearAllData, getObjectData, getStringData, storeObjectData } from "../utils/asyncUtils";
+import { clearAllData, getObjectData, getStringData } from "../utils/asyncUtils";
 import { calculateDaysPassed, formatDate } from "../utils/dateUtils";
 import {
     View,
     Text,
     StyleSheet,
     ScrollView,
-    TouchableOpacity,
     SafeAreaView,
     Platform,
     Image,
-    Dimensions
 } from "react-native";
 import NavigateBtn from "../components/Button";
-import onionHarvest from "../assets/onion_harvest.png";
 import { getKoreanParticle } from "../utils/stringUtils";
 
 type DeathProps = StackScreenProps<RootStackParamList, "Death">;

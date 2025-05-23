@@ -1,7 +1,6 @@
 // does not work
 
-import React, { useState, useEffect } from 'react';
-import { View, Image, StyleSheet, Dimensions, ImageSourcePropType } from 'react-native';
+import { Image, ImageSourcePropType } from 'react-native';
 import { Image as RNImage } from 'react-native';
 import { StyleProp, ImageStyle } from 'react-native';
 
