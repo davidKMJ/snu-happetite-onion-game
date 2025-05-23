@@ -44,6 +44,7 @@ export const Main = ({ route, navigation }: MainProps) => {
     const [daysPassed, setDaysPassed] = useState(0);
     const [text, setText] = useState("");
     const [isModalVisible, setModalVisible] = useState(false);
+    const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
     const [apiResponse, setApiResponse] = useState<ApiResponse>({ score: 0 });
     const [level, setLevel] = useState(0);
     const [isFocused, setIsFocused] = useState(false);
@@ -76,7 +77,13 @@ export const Main = ({ route, navigation }: MainProps) => {
         return () => clearTimeout(timer);
     }, [isModalVisible]);
 
+    useEffect(() => {
+        console.log(isWaitingForResponse)
+    }, [isWaitingForResponse]);
+
     const onPress = async () => {
+        Keyboard.dismiss();
+        setIsWaitingForResponse(true);
         if (!text) {
             console.log("Please enter a message before sending.");
             return;
@@ -196,10 +203,10 @@ export const Main = ({ route, navigation }: MainProps) => {
                         <TouchableOpacity
                             style={[
                                 styles.sendButton,
-                                !text.trim() && styles.sendButtonDisabled,
+                                (!text.trim() && !isWaitingForResponse) && styles.sendButtonDisabled,
                             ]}
                             onPress={onPress}
-                            disabled={!text.trim()}
+                            disabled={!text.trim() && !isWaitingForResponse}
                         >
                             <Text style={styles.sendButtonText}>↑</Text>
                         </TouchableOpacity>

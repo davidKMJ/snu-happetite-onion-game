@@ -88,7 +88,6 @@ Now analyze this Korean phrase: "${phrase}"
             console.error("Invalid score in response:", parsed);
             return { score: 0 };
         }
-
         return parsed;
     } catch (e) {
         console.error("Error in analyzeNewMessage:", e);
