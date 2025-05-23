@@ -44,6 +44,7 @@ export const Main = ({ route, navigation }: MainProps) => {
     const [isModalVisible, setModalVisible] = useState(false);
     const [apiResponse, setApiResponse] = useState<ApiResponse>({ score: 0 });
     const [level, setLevel] = useState(0);
+    const [isFocused, setIsFocused] = useState(false);
     const [onionImage, setOnionImage] = useState(
         OnionImages.GetImage(`onion0`)
     );
@@ -167,7 +168,7 @@ export const Main = ({ route, navigation }: MainProps) => {
                 <MessageModal isVisible={isModalVisible} message={text} style={styles.messageModal} />
 
                 <KeyboardAvoidingView style={styles.bottomContainer} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={200}>
-                    <NavigationBtn
+                    {!isFocused && <View><NavigationBtn
                         navigation={navigation}
                         screenName="ChatLog"
                         text="채팅 로그"
@@ -177,15 +178,17 @@ export const Main = ({ route, navigation }: MainProps) => {
 
                     <Text style={styles.inputLabel}>
                         양파에게 하고 싶은 말을 써보세요
-                    </Text>
+                    </Text></View>}
 
-                    <View style={styles.inputContainer}>
+                    <View style={{...styles.inputContainer, marginTop: isFocused ? 50 : 20}}>
                         <TextInput
                             style={styles.textInput}
                             placeholder="양파에게 욕하기"
                             placeholderTextColor="rgba(78, 102, 74, 0.5)"
                             onChangeText={setText}
                             value={text}
+                            onFocus={() => setIsFocused(true)}
+                            onBlur={() => setIsFocused(false)}
                         />
                         <TouchableOpacity
                             style={[
@@ -319,6 +322,7 @@ const styles = StyleSheet.create({
         elevation: 4,
         borderWidth: 1,
         borderColor: "rgba(78, 102, 74, 0.2)",
+        marginTop: 10,
     },
     textInput: {
         flex: 1,
