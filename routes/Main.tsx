@@ -46,9 +46,10 @@ export const Main = ({ route, navigation }: MainProps) => {
   const { name } = route.params;
   const [daysPassed, setDaysPassed] = useState(0);
   const [text, setText] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isSpeechBubbleVisible, setSpeechBubbleVisible] = useState(false);
-    const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
+  const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse>({ score: 0 });
   const [level, setLevel] = useState(0);
   const [onionImage, setOnionImage] = useState(OnionImages.GetImage(`onion0`));
@@ -85,17 +86,18 @@ export const Main = ({ route, navigation }: MainProps) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setSpeechBubbleVisible(false);
+      setIsWaitingForResponse(false);
     }, 2000);
     return () => clearTimeout(timer);
   }, [isSpeechBubbleVisible]);
 
-    const onPress = async () => {
-        Keyboard.dismiss();
-        setIsWaitingForResponse(true);
-        if (!text) {
-            console.log("Please enter a message before sending.");
-            return;
-        }
+  const onPress = async () => {
+    Keyboard.dismiss();
+    setIsWaitingForResponse(true);
+    if (!text) {
+      console.log("Please enter a message before sending.");
+      return;
+    }
 
     const messageLog = (await getObjectData("messageLog")) || ([] as Message[]);
     const apiResponse = (await analyzeNewMessage(text)) as ApiResponse;
@@ -151,93 +153,106 @@ export const Main = ({ route, navigation }: MainProps) => {
   const height = screenWidth * 0.5 * aspectRatio;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.titleContainer}>
-          <Text style={styles.titleText}>
-            <Text style={styles.titleBoldText}>비난양파 </Text>
-            키우기
-          </Text>
-          <Text style={styles.daysText}>D+{daysPassed}</Text>
-        </View>
-        <TouchableOpacity
-          style={styles.debugButton}
-          onPress={() => {
-            clearAllData();
-            storeStringData("lastScreenName", "Onboarding");
-            navigation.replace("Onboarding");
-          }}
-        >
-          <Text style={styles.debugButtonText}>초기화</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.mainContent}>
-        <View style={styles.onionContainer}>
-          <Image
-            source={onionImage}
-            style={{
-              width: screenWidth * 0.5,
-              height: height,
-              marginBottom: 20,
-              shadowColor: "#000",
-              shadowOffset: {
-                width: 0,
-                height: 4,
-              },
-              shadowOpacity: 0.15,
-              shadowRadius: 8,
-            }}
-          />
-          <Text style={styles.nameText}>{name}</Text>
-        </View>
-
-        <MessageModal
-          isVisible={isModalVisible}
-          message={text}
-          style={styles.messageModal}
-        />
-        <OnionSpeechModal isVisible={isSpeechBubbleVisible} />
-
-        <KeyboardAvoidingView
-          style={styles.bottomContainer}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={200}
-        >
-          <NavigationBtn
-            navigation={navigation}
-            screenName="ChatLog"
-            text="채팅 로그"
-            style={styles.chatLogButton}
-            textStyle={styles.chatLogButtonText}
-          />
-
-          <Text style={styles.inputLabel}>
-            양파에게 하고 싶은 말을 써보세요
-          </Text>
-
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="양파에게 욕하기"
-              placeholderTextColor="rgba(78, 102, 74, 0.5)"
-              onChangeText={setText}
-              value={text}
-            />
-            <TouchableOpacity
-              style={[
-                styles.sendButton,
-                !text.trim() && styles.sendButtonDisabled,
-              ]}
-              onPress={onPress}
-              disabled={!text.trim()}
-            >
-              <Text style={styles.sendButtonText}>↑</Text>
-            </TouchableOpacity>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.titleText}>
+              <Text style={styles.titleBoldText}>비난양파 </Text>
+              키우기
+            </Text>
+            <Text style={styles.daysText}>D+{daysPassed}</Text>
           </View>
-        </KeyboardAvoidingView>
-      </View>
-    </SafeAreaView>
+          <TouchableOpacity
+            style={styles.debugButton}
+            onPress={() => {
+              clearAllData();
+              storeStringData("lastScreenName", "Onboarding");
+              navigation.replace("Onboarding");
+            }}
+          >
+            <Text style={styles.debugButtonText}>초기화</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.mainContent}>
+          <View style={styles.onionContainer}>
+            <Image
+              source={onionImage}
+              style={{
+                width: screenWidth * 0.5,
+                height: height,
+                marginBottom: 20,
+                shadowColor: "#000",
+                shadowOffset: {
+                  width: 0,
+                  height: 4,
+                },
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+              }}
+            />
+            <Text style={styles.nameText}>{name}</Text>
+          </View>
+
+          <MessageModal
+            isVisible={isModalVisible}
+            message={text}
+            style={styles.messageModal}
+          />
+          <OnionSpeechModal isVisible={isSpeechBubbleVisible} />
+
+          <KeyboardAvoidingView
+            style={styles.bottomContainer}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={200}
+          >
+            {!isFocused && (
+              <View>
+                <NavigationBtn
+                  navigation={navigation}
+                  screenName="ChatLog"
+                  text="채팅 로그"
+                  style={styles.chatLogButton}
+                  textStyle={styles.chatLogButtonText}
+                />
+
+                <Text style={styles.inputLabel}>
+                  양파에게 하고 싶은 말을 써보세요
+                </Text>
+              </View>
+            )}
+
+            <View
+              style={{
+                ...styles.inputContainer,
+                marginTop: isFocused ? 80 : 0,
+              }}
+            >
+              <TextInput
+                style={styles.textInput}
+                placeholder="양파에게 욕하기"
+                placeholderTextColor="rgba(78, 102, 74, 0.5)"
+                onChangeText={setText}
+                value={text}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+              />
+              <TouchableOpacity
+                style={[
+                  styles.sendButton,
+                  (!text.trim() || isWaitingForResponse) && styles.sendButtonDisabled,
+                ]}
+                onPress={onPress}
+                disabled={!text.trim() || isWaitingForResponse}
+              >
+                <Text style={styles.sendButtonText}>↑</Text>
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 
